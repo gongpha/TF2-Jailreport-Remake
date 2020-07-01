@@ -3,6 +3,7 @@ Remake of old one that gone.
 
 Reasons are available for customing in `configs/jailreport.cfg`
 
+This plugin required `morecolors.inc`.
 ## Cvars
 
 `jailreport_version` : Version of the plugin<br/>
