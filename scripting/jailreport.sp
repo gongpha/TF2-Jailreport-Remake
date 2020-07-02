@@ -6,7 +6,7 @@
 
 #pragma semicolon 1
 
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
 #define DEFAULT_TITLE "TF2 Jailreport System (Remake)\n"
 #define DEFAULT_CHAT  "{orange}[TF2 Jailreport Remake] {lime}"
 
@@ -72,10 +72,27 @@ public void MH_Result(Menu menu, int num_votes, int num_clients, const int[][] c
 	int no = 0;
 	menu.GetItem(item_info[0][VOTEINFO_ITEM_INDEX], r, sizeof(r));
 	int tc = StringToInt(r);
+	if (num_votes > 1)
+	{
+		if (item_info[0][VOTEINFO_ITEM_INDEX] == item_info[1][VOTEINFO_ITEM_INDEX])
+		{
+			yes = item_info[0][VOTEINFO_ITEM_INDEX];
+			no = yes;
+			CPrintToChatAll("%sVote Draw ! {yellow}(%d/%d){lime} : Randomize result", DEFAULT_CHAT, num_votes, num_clients);
+			if (GetRandomInt(0,1))
+			{
+				CPrintToChatAll("%sWin !", DEFAULT_CHAT, num_votes, num_clients);
+				ForcePlayerSuicide(clientChosen[tc]);
+			}
+			else
+			{
+				CPrintToChatAll("%sLose !", DEFAULT_CHAT, num_votes, num_clients);
+			}
+		}
+	}
 	if (item_info[0][VOTEINFO_ITEM_INDEX] == 0)
 	{
 		CPrintToChatAll("%sVote Success {cyan}(%d/%d){lime} :", DEFAULT_CHAT, num_votes, num_clients);
-
 		ForcePlayerSuicide(clientChosen[tc]);
 		yes = item_info[0][VOTEINFO_ITEM_VOTES];
 		if (num_items > 1) {
@@ -151,6 +168,11 @@ public int MH_Player(Menu menu, MenuAction action, int param1, int param2)
 		Menu new_menu = new Menu(MH_Reason);
 		int target = StringToInt(cl, 10);
 		clientChosen[param1] = target;
+		if (!IsPlayerAlive(target))
+		{
+			CPrintToChat(param1, "%sTarget is not alive !", DEFAULT_CHAT);
+			delete menu;
+		}
 		if(IsClientInGame(target) && !IsFakeClient(target))
 		{
 			GetClientName(target, targetname, sizeof(targetname));
@@ -195,7 +217,7 @@ public void openPlayerMenu(int client)
 	// PLAYERS
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if(IsClientInGame(i) && !IsFakeClient(i))
+		if(IsClientInGame(i) && !IsFakeClient(i) && IsPlayerAlive(i))
 		{
 			if (GetClientTeam(i) == _:TFTeam_Blue)
 			{
@@ -245,4 +267,5 @@ public Action Command_ResetDelay(int client, int args)
 	if (DelayTimer)
 		KillTimer(DelayTimer);
 	OnDelay = false;
+	return Plugin_Handled;
 }
