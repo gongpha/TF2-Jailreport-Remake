@@ -6,7 +6,7 @@
 
 #pragma semicolon 1
 
-#define PLUGIN_VERSION "1.1"
+#define PLUGIN_VERSION "1.1.1"
 #define DEFAULT_TITLE "TF2 Jailreport System (Remake)\n"
 #define DEFAULT_CHAT  "{orange}[TF2 Jailreport Remake] {lime}"
 
@@ -65,35 +65,40 @@ public Action DisableDelay(Handle timer)
 	DelayTimer = null;
 }
 
+public void killClient(int target_client)
+{
+	if (!IsPlayerAlive(target_client))
+		CPrintToChatAll("%sBut Target is not alive now !", DEFAULT_CHAT);
+	else
+		ForcePlayerSuicide(target_client);
+}
+
 public void MH_Result(Menu menu, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info)
 {
-	char r[2];
+	char r[4];
 	int yes = 0;
 	int no = 0;
 	menu.GetItem(item_info[0][VOTEINFO_ITEM_INDEX], r, sizeof(r));
 	int tc = StringToInt(r);
-	if (num_votes > 1)
+	if (num_votes > 1 && item_info[0][VOTEINFO_ITEM_INDEX] == item_info[1][VOTEINFO_ITEM_INDEX])
 	{
-		if (item_info[0][VOTEINFO_ITEM_INDEX] == item_info[1][VOTEINFO_ITEM_INDEX])
+		yes = item_info[0][VOTEINFO_ITEM_INDEX];
+		no = yes;
+		CPrintToChatAll("%sVote Draw ! {yellow}(%d/%d){lime} : Randomize result", DEFAULT_CHAT, num_votes, num_clients);
+		if (GetRandomInt(0,1))
 		{
-			yes = item_info[0][VOTEINFO_ITEM_INDEX];
-			no = yes;
-			CPrintToChatAll("%sVote Draw ! {yellow}(%d/%d){lime} : Randomize result", DEFAULT_CHAT, num_votes, num_clients);
-			if (GetRandomInt(0,1))
-			{
-				CPrintToChatAll("%sWin !", DEFAULT_CHAT, num_votes, num_clients);
-				ForcePlayerSuicide(clientChosen[tc]);
-			}
-			else
-			{
-				CPrintToChatAll("%sLose !", DEFAULT_CHAT, num_votes, num_clients);
-			}
+			CPrintToChatAll("%sWin !", DEFAULT_CHAT, num_votes, num_clients);
+			killClient(clientChosen[tc]);
+		}
+		else
+		{
+			CPrintToChatAll("%sLose !", DEFAULT_CHAT, num_votes, num_clients);
 		}
 	}
-	if (item_info[0][VOTEINFO_ITEM_INDEX] == 0)
+	else if (item_info[0][VOTEINFO_ITEM_INDEX] == 0)
 	{
 		CPrintToChatAll("%sVote Success {cyan}(%d/%d){lime} :", DEFAULT_CHAT, num_votes, num_clients);
-		ForcePlayerSuicide(clientChosen[tc]);
+		killClient(clientChosen[tc]);
 		yes = item_info[0][VOTEINFO_ITEM_VOTES];
 		if (num_items > 1) {
 			no = item_info[1][VOTEINFO_ITEM_VOTES];
@@ -108,7 +113,6 @@ public void MH_Result(Menu menu, int num_votes, int num_clients, const int[][] c
 		}
 	}
 	CPrintToChatAll("%sNo Vote[{gray}%d{lime}]   Yes[{darkgreen}%d{lime}] No[{darkred}%d{lime}]", DEFAULT_CHAT, num_clients - num_votes, yes, no);
-	clientChosen[tc] = 0;
 	OnDelay = true;
 	DelayTimer = CreateTimer(cv[2].FloatValue, DisableDelay);
 	currentVoteMenu = null;
@@ -116,11 +120,6 @@ public void MH_Result(Menu menu, int num_votes, int num_clients, const int[][] c
 
 public int MH_Reason(Menu menu, MenuAction action, int param1, int param2)
 {
-	// TODO : VOTEEEEEEEEEEEEEEEE
-
-
-
-
 	if (action == MenuAction_Select)
 	{
 		char reason_name[128];
@@ -139,7 +138,7 @@ public int MH_Reason(Menu menu, MenuAction action, int param1, int param2)
 		currentVoteMenu.SetTitle(title);
 		currentVoteMenu.ExitButton = false;
 		currentVoteMenu.NoVoteButton = true;
-		char c[2];
+		char c[4];
 		IntToString(param1, c, sizeof(c));
 		currentVoteMenu.AddItem(c, "Yes");
 		currentVoteMenu.AddItem(c, "No");
