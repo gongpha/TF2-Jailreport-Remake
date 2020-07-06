@@ -6,7 +6,7 @@
 
 #pragma semicolon 1
 
-#define PLUGIN_VERSION "1.1.1"
+#define PLUGIN_VERSION "1.1.2"
 #define DEFAULT_TITLE "TF2 Jailreport System (Remake)\n"
 #define DEFAULT_CHAT  "{orange}[TF2 Jailreport Remake] {lime}"
 
@@ -80,9 +80,9 @@ public void MH_Result(Menu menu, int num_votes, int num_clients, const int[][] c
 	int no = 0;
 	menu.GetItem(item_info[0][VOTEINFO_ITEM_INDEX], r, sizeof(r));
 	int tc = StringToInt(r);
-	if (num_votes > 1 && item_info[0][VOTEINFO_ITEM_INDEX] == item_info[1][VOTEINFO_ITEM_INDEX])
+	if (num_votes > 1 && item_info[0][VOTEINFO_ITEM_VOTES] == item_info[1][VOTEINFO_ITEM_VOTES])
 	{
-		yes = item_info[0][VOTEINFO_ITEM_INDEX];
+		yes = item_info[0][VOTEINFO_ITEM_VOTES];
 		no = yes;
 		CPrintToChatAll("%sVote Draw ! {yellow}(%d/%d){lime} : Randomize result", DEFAULT_CHAT, num_votes, num_clients);
 		if (GetRandomInt(0,1))
